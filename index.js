@@ -3,6 +3,8 @@ const productRoutes=require("./routes/productRoutes")
 const userRoutes=require("./routes/userRoutes")
 const cartRoutes=require("./routes/cartRoutes")
 const app=express();
+const cors=require ("cors");
+app.use(cors());
 
 const mongoose=require('mongoose');
 app.use(express.json());
