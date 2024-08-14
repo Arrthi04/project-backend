@@ -208,7 +208,7 @@ exports.getcart = async (req, res) => {
     const { user_id } = req.user; // Extract user ID from the token
 
     try {
-        const cart = await Cart.findOne({ user_id }).populate('products.product_id'); // Populate product details
+        const cart = await Cart.findOne({ user_id }); // Populate product details
 
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
