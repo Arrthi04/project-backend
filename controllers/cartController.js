@@ -123,10 +123,10 @@ exports.createCart = async (req, res) => {
             const productIndex = cart.products.findIndex(prod => prod.product_id === product_id);
 
             if (productIndex > -1) {
-                // Update the quantity if the product is already in the cart
+                // Updating the quantity if the product is already in the cart
                 cart.products[productIndex].quantity = quantity;
             } else {
-                // Add a new product to the cart
+                // Adding a new product to the cart
                 cart.products.push({ product_id, quantity });
             }
         }
@@ -139,40 +139,70 @@ exports.createCart = async (req, res) => {
     }
 };
 
+// exports.deleteCart = async (req, res) => {
+//     const { user_id } = req.user; 
+//     const { product_id } = req.params; 
+
+//     try {
+//         let cart = await Cart.findOne({ user_id });
+
+//         if (!cart) {
+//             return res.status(404).json({ message: "Cart not found" });
+//         }
+
+//         const productIndex = cart.products.findIndex(prod => prod.product_id === product_id);
+
+//         if (productIndex === -1) {
+//             return res.status(404).json({ message: "Product not found in cart" });
+//         }
+
+//         // Remove the product from the cart
+//         cart.products.splice(productIndex, 1);
+
+//         if (cart.products.length === 0) {
+//             // Delete the cart if no products are left
+//             await Cart.deleteOne({ user_id });
+//             return res.status(200).json({ message: "Cart is empty and has been deleted" });
+//         } else {
+//             await cart.save(); // Save changes to the cart
+//             res.status(200).json({ message: "Product removed from cart", cart });
+//         }
+//     } catch (err) {
+//         console.error("Error removing from cart:", err);
+//         res.status(500).json({ message: "Internal server error", err });
+//     }
+// };
+// Delete a Product from Cart
 exports.deleteCart = async (req, res) => {
-    const { user_id } = req.user; // Extract user ID from the token
-    const { product_id } = req.params; // Extract product ID from the URL
+    const { user_id } = req.user;
+    const product_id = req.params.id;
 
     try {
         let cart = await Cart.findOne({ user_id });
 
         if (!cart) {
-            return res.status(404).json({ message: "Cart not found" });
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const productIndex = cart.products.findIndex(prod => prod.product_id === product_id);
+        const IsProduct = cart.products.find((product) => product.product_id === product_id);
 
-        if (productIndex === -1) {
-            return res.status(404).json({ message: "Product not found in cart" });
+        if (!IsProduct) {
+            return res.status(401).json({ message: "Product not found" });
         }
 
-        // Remove the product from the cart
-        cart.products.splice(productIndex, 1);
-
-        if (cart.products.length === 0) {
-            // Delete the cart if no products are left
+        if (cart.products.length <= 1) {
             await Cart.deleteOne({ user_id });
-            return res.status(200).json({ message: "Cart is empty and has been deleted" });
+            return res.status(200).json({ message: "Product deleted from cart" });
         } else {
-            await cart.save(); // Save changes to the cart
-            res.status(200).json({ message: "Product removed from cart", cart });
+            cart.products = cart.products.filter((pr) => pr.product_id !== product_id);
+            await cart.save();
+            return res.status(200).json({ message: "Product deleted from cart" });
         }
     } catch (err) {
-        console.error("Error removing from cart:", err);
-        res.status(500).json({ message: "Internal server error", err });
+        console.error("Error in deleteCart:", err);
+        return res.status(500).json({ message: "Internal server error", error: err.message });
     }
 };
-
 
 exports.getcart = async (req, res) => {
     const { user_id } = req.user; // Extract user ID from the token
